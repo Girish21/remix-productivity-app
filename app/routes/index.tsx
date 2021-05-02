@@ -1,13 +1,11 @@
 import { Todo } from ".prisma/client";
-import {
+import type {
   ActionFunction,
-  json,
   LinksFunction,
   LoaderFunction,
   MetaFunction,
-  redirect,
-  useRouteData,
 } from "remix";
+import { json, redirect, useRouteData } from "remix";
 import { TodoForm } from "../components/todoform";
 import { TodoList } from "../components/todolist";
 import { prisma } from "../db";
@@ -31,7 +29,11 @@ export let loader: LoaderFunction = async () => {
 
 export const action: ActionFunction = async ({ request }) => {
   const params = new URLSearchParams(await request.text());
-  const todo = params.get("todo")!;
+  const todo = params.get("todo");
+
+  if (!todo) {
+    return redirect("/");
+  }
 
   await prisma.todo.create({ data: { todo } });
 

@@ -7,7 +7,7 @@ export const TodoList = ({ todos }: { todos: Todo[] }) => {
 
   todos = [
     ...todos,
-    ...((pendingState && [
+    ...((pendingState && pendingState.method === 'post' && [
       {
         todo: (pendingState.data.get("todo") as string)!,
         id: todos.length,

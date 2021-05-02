@@ -30,29 +30,44 @@ export let loader: LoaderFunction = async () => {
 export const action: ActionFunction = async ({ request }) => {
   const params = new URLSearchParams(await request.text());
 
-  if (request.method.toLowerCase() === "put") {
-    const todoId = params.get("id");
-    const todoStatus = params.get("checked");
+  switch (request.method.toLowerCase()) {
+    case "put": {
+      const todoId = params.get("id");
+      const todoStatus = params.get("checked");
 
-    if (!todoId) return redirect("/");
+      if (!todoId) return redirect("/");
 
-    await prisma.todo.update({
-      where: { id: Number(todoId) },
-      data: { completed: todoStatus === "true" },
-    });
+      await prisma.todo.update({
+        where: { id: Number(todoId) },
+        data: { completed: todoStatus === "true" },
+      });
 
-    return redirect("/");
-  } else {
-    const todo = params.get("todo");
-
-    if (!todo) {
       return redirect("/");
     }
+    case "post": {
+      const todo = params.get("todo");
 
-    await prisma.todo.create({ data: { todo } });
+      if (!todo) {
+        return redirect("/");
+      }
 
-    return redirect("/");
+      await prisma.todo.create({ data: { todo } });
+
+      return redirect("/");
+    }
+    case "delete": {
+      const todoId = params.get("id");
+
+      if (!todoId) return redirect("/");
+
+      await prisma.todo.delete({ where: { id: Number(todoId) } });
+
+      return redirect("/");
+    }
+    default:
+      redirect("/", { status: 404 });
   }
+  return redirect("/");
 };
 
 export default function Index() {

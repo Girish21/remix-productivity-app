@@ -23,6 +23,7 @@ export const TodoForm = () => {
           className="border-solid border-b border-green-500 placeholder-gray-600 placeholder-opacity-75 focus:outline-none focus:border-b-2"
           placeholder="Enter Todo"
           autoComplete="off"
+          disabled={!!pendingState}
         />
       </Form>
     </div>

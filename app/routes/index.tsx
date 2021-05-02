@@ -1,5 +1,16 @@
-import type { LinksFunction, LoaderFunction, MetaFunction } from "remix";
-import { useRouteData } from "remix";
+import { Todo } from ".prisma/client";
+import {
+  ActionFunction,
+  json,
+  LinksFunction,
+  LoaderFunction,
+  MetaFunction,
+  redirect,
+  useRouteData,
+} from "remix";
+import { TodoForm } from "../components/todoform";
+import { TodoList } from "../components/todolist";
+import { prisma } from "../db";
 import stylesUrl from "../styles/index.css";
 
 export let meta: MetaFunction = () => {
@@ -14,20 +25,30 @@ export let links: LinksFunction = () => {
 };
 
 export let loader: LoaderFunction = async () => {
-  return { message: "this is awesome 😎" };
+  const rows = await prisma.todo.findMany();
+  return json(rows);
+};
+
+export const action: ActionFunction = async ({ request }) => {
+  const params = new URLSearchParams(await request.text());
+  const todo = params.get("todo")!;
+
+  await prisma.todo.create({ data: { todo } });
+
+  return redirect("/");
 };
 
 export default function Index() {
-  let data = useRouteData();
-
+  const data = useRouteData<Todo[]>();
   return (
-    <div style={{ textAlign: "center", padding: 20 }}>
-      <h2>Welcome to Remix!</h2>
-      <p>
-        <a href="https://remix.run/dashboard/docs">Check out the docs</a> to get
-        started.
-      </p>
-      <p>Message from the loader: {data.message}</p>
-    </div>
+    <main className="p-4 grid grid-cols-[calc(100%-1400px),1fr,calc(100%-1400px)]">
+      <div className="col-start-2 col-end-3 p-4 h-full">
+        <h1 className="text-4xl text-center">Todo's</h1>
+        <section>
+          <TodoList todos={data} />
+          <TodoForm />
+        </section>
+      </div>
+    </main>
   );
 }

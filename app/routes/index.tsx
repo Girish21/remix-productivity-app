@@ -1,6 +1,7 @@
 import { Todo } from ".prisma/client";
 import type {
   ActionFunction,
+  HeadersFunction,
   LinksFunction,
   LoaderFunction,
   MetaFunction,
@@ -13,8 +14,8 @@ import stylesUrl from "../styles/index.css";
 
 export let meta: MetaFunction = () => {
   return {
-    title: "Remix Starter",
-    description: "Welcome to remix!",
+    title: "Remix Todo app",
+    description: "Simple todo app using Remix",
   };
 };
 

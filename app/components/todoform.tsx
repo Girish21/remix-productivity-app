@@ -1,11 +1,22 @@
+import * as React from "react";
+import { Form, usePendingFormSubmit } from "remix";
+
 export const TodoForm = () => {
+  const pendingState = usePendingFormSubmit();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (inputRef.current) inputRef.current.value = "";
+  }, [pendingState]);
+
   return (
     <div className="mt-4">
-      <form method="POST">
+      <Form method="post">
         <label htmlFor="todo" className="sr-only">
           Todo item
         </label>
         <input
+          ref={inputRef}
           name="todo"
           id="todo"
           type="text"
@@ -13,7 +24,7 @@ export const TodoForm = () => {
           placeholder="Enter Todo"
           autoComplete="off"
         />
-      </form>
+      </Form>
     </div>
   );
 };

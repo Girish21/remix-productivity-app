@@ -1,7 +1,22 @@
 import { Todo } from ".prisma/client";
+import { usePendingFormSubmit } from "remix";
 import { TodoItem } from "./todoitem";
 
 export const TodoList = ({ todos }: { todos: Todo[] }) => {
+  const pendingState = usePendingFormSubmit();
+
+  todos = [
+    ...todos,
+    ...((pendingState && [
+      {
+        todo: (pendingState.data.get("todo") as string)!,
+        id: todos.length,
+        completed: false,
+      },
+    ]) ||
+      []),
+  ];
+
   return (
     <>
       {todos.length > 0 && (

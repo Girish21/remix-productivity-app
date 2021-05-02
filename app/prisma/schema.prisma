@@ -15,10 +15,22 @@ model User {
   email    String  @unique
   name     String?
   verified Boolean @default(false)
+  tracks   Track[]
+}
+
+model Track {
+  id      Int    @id @default(autoincrement())
+  name    String @unique
+  user    User?  @relation(fields: [user_id], references: [id])
+  user_id Int?
+  Todo    Todo[]
 }
 
 model Todo {
-  id        Int     @id @default(autoincrement())
-  todo      String
-  completed Boolean @default(false)
+  id         Int      @id @default(autoincrement())
+  todo       String
+  track      Track    @relation(fields: [track_name], references: [name])
+  completed  Boolean  @default(false)
+  created_at DateTime @default(now())
+  track_name String
 }

@@ -7,13 +7,17 @@ export const TodoList = ({ todos }: { todos: Todo[] }) => {
 
   todos = [
     ...todos,
-    ...((pendingState && pendingState.method === 'post' && [
-      {
-        todo: (pendingState.data.get("todo") as string)!,
-        id: todos.length,
-        completed: false,
-      },
-    ]) ||
+    ...((pendingState &&
+      pendingState.method === "post" &&
+      pendingState.data.get("todo") && [
+        {
+          todo: (pendingState.data.get("todo") as string)!,
+          id: todos.length,
+          completed: false,
+          created_at: new Date(),
+          track_name: "",
+        },
+      ]) ||
       []),
   ];
 

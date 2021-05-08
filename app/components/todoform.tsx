@@ -6,12 +6,15 @@ export const TodoForm = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputRef.current) {
+      inputRef.current.value = "";
+      inputRef.current.focus();
+    }
   }, [pendingState]);
 
   return (
     <div className="mt-4">
-      <Form method="post">
+      <Form method="post" name="todo_form">
         <label htmlFor="todo" className="sr-only">
           Todo item
         </label>

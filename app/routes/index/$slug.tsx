@@ -13,12 +13,15 @@ import { prisma } from "../../db";
 export let loader: LoaderFunction = async ({ params }) => {
   const rows = await prisma.todo.findMany({
     where: { track_name: String(params.slug) },
-    orderBy: { id: "asc" },
+    orderBy: { created_at: "asc" },
   });
   return json(rows);
 };
 
-export const action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({
+  request,
+  params: routeParams,
+}) => {
   const params = new URLSearchParams(await request.text());
 
   switch (request.method.toLowerCase()) {
@@ -26,39 +29,41 @@ export const action: ActionFunction = async ({ request }) => {
       const todoId = params.get("id");
       const todoStatus = params.get("checked");
 
-      if (!todoId) return redirect("/");
+      if (!todoId) return redirect(`/${routeParams.slug}`);
 
       await prisma.todo.update({
         where: { id: Number(todoId) },
         data: { completed: todoStatus === "true" },
       });
 
-      return redirect("/");
+      return redirect(`/${routeParams.slug}`);
     }
     case "post": {
       const todo = params.get("todo");
 
       if (!todo) {
-        return redirect("/");
+        return redirect(`/${routeParams.slug}`);
       }
 
-      await prisma.todo.create({ data: { todo, track_name: "test" } });
+      await prisma.todo.create({
+        data: { todo, track_name: routeParams.slug },
+      });
 
-      return redirect("/");
+      return redirect(`/${routeParams.slug}`);
     }
     case "delete": {
       const todoId = params.get("id");
 
-      if (!todoId) return redirect("/");
+      if (!todoId) return redirect(`/${routeParams.slug}`);
 
       await prisma.todo.delete({ where: { id: Number(todoId) } });
 
-      return redirect("/");
+      return redirect(`/${routeParams.slug}`);
     }
     default:
-      redirect("/", { status: 404 });
+      redirect(`/${routeParams.slug}`, { status: 404 });
   }
-  return redirect("/");
+  return redirect(`/${routeParams.slug}`);
 };
 
 export default function Index() {

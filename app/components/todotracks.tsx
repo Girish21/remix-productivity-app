@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { Form } from "remix";
 import { RouteDataType as TracksType } from "../routes";
+import { Badge } from "./badge";
 
 type TodoTracksType = {
   tracks: TracksType;
@@ -45,8 +46,10 @@ export const TodoTracks = ({ tracks }: TodoTracksType) => {
           activeClassName="shadow-inner text-blue-400"
         >
           {name}
-          <div className="flex items-center">
-            {selectedCount} / {totalCount}
+          <div className="flex items-center space-x-3">
+            <Badge>{selectedCount}</Badge>
+            <span>/</span>
+            <Badge>{totalCount}</Badge>
           </div>
         </NavLink>
       ))}

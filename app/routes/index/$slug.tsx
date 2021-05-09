@@ -1,4 +1,5 @@
 import { Todo } from ".prisma/client";
+import { Navigate } from "react-router";
 import {
   ActionFunction,
   json,
@@ -11,6 +12,12 @@ import { TodoList } from "../../components/todolist";
 import { prisma } from "../../db";
 
 export let loader: LoaderFunction = async ({ params }) => {
+  const validSlug = await prisma.track.findUnique({
+    where: { name: String(params.slug) },
+  });
+
+  if (!validSlug) return redirect("/");
+
   const rows = await prisma.todo.findMany({
     where: { track_name: String(params.slug) },
     orderBy: { created_at: "asc" },

@@ -10,6 +10,7 @@ import {
 } from "remix";
 import { TodoTracks } from "../components/todotracks";
 import { prisma } from "../db";
+import { requireUserSession } from "../session";
 import stylesUrl from "../styles/index.css";
 
 export type RouteDataType = {
@@ -29,24 +30,26 @@ export let links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
-export const loader: LoaderFunction = async () => {
-  const data = await prisma.track.findMany({
-    select: { name: true, Todo: { select: { id: true, completed: true } } },
+export const loader: LoaderFunction = async ({ request }) => {
+  return requireUserSession(request, async ({ id }) => {
+    const data = await prisma.track.findMany({
+      select: { name: true, Todo: { select: { id: true, completed: true } } },
+    });
+
+    if (data.length === 0) return json([]);
+
+    return json(
+      data.map(({ name, Todo }) => {
+        const selectedCount = Todo.reduce(
+          (total, cur) => total + (cur.completed ? 1 : 0),
+          0
+        );
+        const totalCount = Todo.length;
+
+        return { name, selectedCount, totalCount };
+      })
+    );
   });
-
-  if (data.length === 0) return json([]);
-
-  return json(
-    data.map(({ name, Todo }) => {
-      const selectedCount = Todo.reduce(
-        (total, cur) => total + (cur.completed ? 1 : 0),
-        0
-      );
-      const totalCount = Todo.length;
-
-      return { name, selectedCount, totalCount };
-    })
-  );
 };
 
 export const action: ActionFunction = async ({ request }) => {

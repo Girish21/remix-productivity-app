@@ -1,6 +1,12 @@
 import { Outlet } from "react-router-dom";
-import type { LinksFunction, MetaFunction } from "remix";
-import { Links, LiveReload, Meta, Scripts } from "remix";
+import {
+  Links,
+  LinksFunction,
+  LiveReload,
+  Meta,
+  MetaFunction,
+  Scripts,
+} from "remix";
 import tailwindUrl from "./styles/app.css";
 import stylesUrl from "./styles/global.css";
 

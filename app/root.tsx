@@ -1,8 +1,14 @@
 import { Outlet } from "react-router-dom";
-import type { LinksFunction } from "remix";
+import type { LinksFunction, MetaFunction } from "remix";
 import { Links, LiveReload, Meta, Scripts } from "remix";
 import tailwindUrl from "./styles/app.css";
 import stylesUrl from "./styles/global.css";
+
+export const meta: MetaFunction = () => {
+  return {
+    viewport: "width=device-width,initial-scale=1,viewport-fit=cover",
+  };
+};
 
 export let links: LinksFunction = () => {
   return [

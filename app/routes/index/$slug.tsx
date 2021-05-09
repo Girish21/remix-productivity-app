@@ -1,5 +1,4 @@
 import { Todo } from ".prisma/client";
-import { Navigate } from "react-router";
 import {
   ActionFunction,
   json,
@@ -10,19 +9,32 @@ import {
 import { TodoForm } from "../../components/todoform";
 import { TodoList } from "../../components/todolist";
 import { prisma } from "../../db";
+import { commitSession, getSession } from "../../session";
 
-export let loader: LoaderFunction = async ({ params }) => {
+type RouteData = {
+  data: Todo[];
+  error: Record<string, Record<string, string>>;
+};
+
+export let loader: LoaderFunction = async ({ params, request }) => {
+  const session = await getSession(request.headers.get("Cookie"));
   const validSlug = await prisma.track.findUnique({
     where: { name: String(params.slug) },
   });
 
-  if (!validSlug) return redirect("/");
+  if (!validSlug)
+    return redirect("/", {
+      headers: { "Set-Cookie": await commitSession(session) },
+    });
 
   const rows = await prisma.todo.findMany({
     where: { track_name: String(params.slug) },
     orderBy: { created_at: "asc" },
   });
-  return json(rows);
+  return json(
+    { data: rows, error: session.get("creation_error") },
+    { headers: { "Set-Cookie": await commitSession(session) } }
+  );
 };
 
 export const action: ActionFunction = async ({
@@ -30,6 +42,7 @@ export const action: ActionFunction = async ({
   params: routeParams,
 }) => {
   const params = new URLSearchParams(await request.text());
+  const session = await getSession(request.headers.get("Cookie"));
 
   switch (request.method.toLowerCase()) {
     case "put": {
@@ -49,7 +62,15 @@ export const action: ActionFunction = async ({
       const todo = params.get("todo");
 
       if (!todo) {
-        return redirect(`/${routeParams.slug}`);
+        session.flash("creation_error", {
+          error: "Enter a valid Todo item",
+          value: { todo },
+        });
+        return redirect(`/${routeParams.slug}`, {
+          headers: {
+            "Set-Cookie": await commitSession(session),
+          },
+        });
       }
 
       await prisma.todo.create({
@@ -74,13 +95,13 @@ export const action: ActionFunction = async ({
 };
 
 export default function Index() {
-  const data = useRouteData<Todo[]>();
+  const { data, error } = useRouteData<RouteData>();
 
   return (
     <section className="col-start-2 col-end-3 p-4 h-full">
       <h1 className="text-4xl text-center">Todo's</h1>
       <TodoList todos={data} />
-      <TodoForm />
+      <TodoForm error={error} />
     </section>
   );
 }

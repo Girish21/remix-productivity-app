@@ -3,7 +3,7 @@ import { Form } from "remix";
 
 type DeleteButtonType = {
   todoId: number;
-} & React.HTMLAttributes<HTMLButtonElement>;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const DeleteButton = React.forwardRef<
   HTMLButtonElement,
@@ -15,7 +15,7 @@ export const DeleteButton = React.forwardRef<
       <button
         type="submit"
         ref={ref}
-        className="rounded-full w-6 h-6 p-1 bg-red-500 fill-current text-white grid place-content-center focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-red-300"
+        className="rounded-full w-6 h-6 p-1 bg-red-500 fill-current text-white grid place-content-center focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-red-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
         aria-label="delete action"
         {...rest}
       >

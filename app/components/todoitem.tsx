@@ -6,19 +6,18 @@ export const TodoItem = ({ completed, id, todo }: Todo) => {
   const pendingForm = usePendingFormSubmit();
   const submit = useSubmit();
 
-  const optimisticUpdate =
-    pendingForm &&
-    pendingForm.method === "put" &&
-    Number(pendingForm.data.get("id")) === id;
+  const optimisticUpdate = pendingForm && pendingForm.method === "put";
 
-  const optimisticDelete =
+  const optimisticDelete = pendingForm && pendingForm.method === "delete";
+
+  const itemDeleted =
     pendingForm &&
-    pendingForm.method === "delete" &&
+    optimisticDelete &&
     Number(pendingForm.data.get("id")) === id;
 
   return (
     <>
-      {!optimisticDelete && (
+      {!itemDeleted && (
         <li className="flex space-x-3 items-center">
           {pendingForm && optimisticUpdate ? (
             <input
@@ -32,6 +31,7 @@ export const TodoItem = ({ completed, id, todo }: Todo) => {
               type="checkbox"
               id={`${id}-${todo}`}
               checked={completed}
+              disabled={optimisticDelete}
               onChange={(e) => {
                 submit(
                   { checked: String(e.target.checked), id: String(id) },
@@ -41,7 +41,7 @@ export const TodoItem = ({ completed, id, todo }: Todo) => {
             />
           )}
           <label htmlFor={`${id}-${todo}`}>{todo}</label>
-          <DeleteButton todoId={id} />
+          <DeleteButton todoId={id} disabled={optimisticDelete} />
         </li>
       )}
     </>

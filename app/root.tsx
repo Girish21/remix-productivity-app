@@ -12,7 +12,7 @@ import stylesUrl from "./styles/global.css";
 
 export const meta: MetaFunction = () => {
   return {
-    viewport: "width=device-width,initial-scale=1,viewport-fit=cover",
+    viewport: "width=device-width,initial-scale=1",
   };
 };
 

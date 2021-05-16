@@ -10,7 +10,7 @@ import {
 } from "remix";
 import { TodoTracks } from "../components/todotracks";
 import { prisma } from "../db";
-import { requireUserSession } from "../session";
+import { getUserSession, requireUserSession } from "../session";
 import stylesUrl from "../styles/index.css";
 
 export type RouteDataType = {
@@ -34,9 +34,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   return requireUserSession(request, async ({ id }) => {
     const data = await prisma.track.findMany({
       select: { name: true, Todo: { select: { id: true, completed: true } } },
+      where: { user_id: id },
     });
 
-    if (data.length === 0) return json([]);
+    if (data.length === 0) return redirect("/404");
 
     return json(
       data.map(({ name, Todo }) => {
@@ -54,12 +55,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const params = new URLSearchParams(await request.text());
+  const user_id = await getUserSession(request);
 
   const trackName = params.get("track");
 
   if (!trackName) return redirect("/");
 
-  await prisma.track.create({ data: { name: trackName, user_id: 1 } });
+  await prisma.track.create({ data: { name: trackName, user_id } });
 
   return redirect(`/${trackName}`);
 };

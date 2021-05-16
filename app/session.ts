@@ -1,26 +1,24 @@
 import { redirect, Request } from "remix";
 import { createCookieSessionStorage, LoaderFunction } from "remix";
 
-const {
-  commitSession,
-  destroySession,
-  getSession,
-} = createCookieSessionStorage({
-  cookie: {
-    httpOnly: true,
-    secure: true,
-    name: "__session",
-    path: "/",
-    secrets: ["my secret"],
-  },
-});
+const { commitSession, destroySession, getSession } =
+  createCookieSessionStorage({
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      name: "__session",
+      path: "/",
+      secrets: ["my secret"],
+    },
+  });
 
 type UserSession = {
-  id: number;
+  id: string;
 };
 
 const getUserSession = async (request: Request) => {
-  return null;
+  const session = await getSession(request.headers.get("Cookie"));
+  return session.get("user_id");
 };
 
 const requireUserSession = async (

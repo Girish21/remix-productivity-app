@@ -9,7 +9,7 @@ import {
 import { TodoForm } from "../../components/todoform";
 import { TodoList } from "../../components/todolist";
 import { prisma } from "../../db";
-import { commitSession, getSession } from "../../session";
+import { commitSession, getSession, getUserSession } from "../../session";
 
 type RouteData = {
   data: Todo[];
@@ -18,23 +18,23 @@ type RouteData = {
 
 export let loader: LoaderFunction = async ({ params, request }) => {
   const session = await getSession(request.headers.get("Cookie"));
-  const validSlug = await prisma.track.findUnique({
-    where: { name: String(params.slug) },
-  });
+  const user_id = await getUserSession(request);
 
-  if (!validSlug)
-    return redirect("/", {
-      headers: { "Set-Cookie": await commitSession(session) },
-    });
+  const track_id = await prisma.track.findUnique({
+    select: { id: true },
+    where: { name_user_id: { user_id, name: params.slug } },
+  });
+  if (!track_id) {
+    return redirect("/");
+  }
+
+  const { id } = track_id;
 
   const rows = await prisma.todo.findMany({
-    where: { track_name: String(params.slug) },
+    where: { track_id: id },
     orderBy: { created_at: "asc" },
   });
-  return json(
-    { data: rows, error: session.get("creation_error") },
-    { headers: { "Set-Cookie": await commitSession(session) } }
-  );
+  return json({ data: rows, error: session.get("creation_error") });
 };
 
 export const action: ActionFunction = async ({
@@ -43,6 +43,15 @@ export const action: ActionFunction = async ({
 }) => {
   const params = new URLSearchParams(await request.text());
   const session = await getSession(request.headers.get("Cookie"));
+  const user_id = await getUserSession(request);
+
+  const track_id = await prisma.track.findUnique({
+    select: { id: true },
+    where: { name_user_id: { user_id, name: routeParams.slug } },
+  });
+  if (!track_id) {
+    return redirect("/");
+  }
 
   switch (request.method.toLowerCase()) {
     case "put": {
@@ -74,7 +83,7 @@ export const action: ActionFunction = async ({
       }
 
       await prisma.todo.create({
-        data: { todo, track_name: routeParams.slug },
+        data: { todo, track_id: track_id.id, user_id },
       });
 
       return redirect(`/${routeParams.slug}`);
